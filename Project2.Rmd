@@ -1,0 +1,126 @@
+---
+title: "Project2"
+author: "Miguel Corral"
+date: "23th September 2015"
+output: 
+  html_document:
+    css: styles.css
+---
+
+# Overview
+
+This report shows the analysis done upon the ToothGrowth data in the R datasets package.
+
+```{r echo=FALSE, warning=FALSE}
+# load necessary libraries
+library(datasets)
+library(ggplot2) 
+library(data.table)
+```
+# Step 1: Load the ToothGrowth data and perform some basic exploratory data analyses 
+
+```{r}
+# load data and perform some exploratory data analyses
+data(ToothGrowth)
+str(ToothGrowth)
+```
+
+```{r fig.width=5, fig.height=2,echo=FALSE}
+plot <- ggplot(ToothGrowth, 
+               aes(x=factor(dose),y=len,fill=factor(dose)))
+plot + geom_boxplot(notch=F) + facet_grid(.~supp) +
+     scale_x_discrete("Dose [mg]") +   
+     scale_y_continuous("Length of teeth") +  
+     ggtitle("Representation of ToothGrowth dataset")
+```
+
+# Step 2: Provide a basic summary of the data
+
+```{r echo=FALSE}
+summary(ToothGrowth)
+```
+
+As shown in the review of the dataset made in Step 1, together with the summmary above presented, the data is a set of 60 observations of length of teeth in each of 10 guinea pigs at each of three dose levels of Vitamin C (0.5, 1 and 2 mg) with each of two delivery methods (orange juice:OC or ascorbic acid:AC).
+
+Plotting length of teeth against dose and supplement shows that the length of teeth seems correlated with the dose level (quantity of Vitamin C), and also seems that Ascorbic Acid (VC) supplement could have influenced in a major effect of the dose provided, making teeth to grow a bit more.
+
+# Step 3: Use confidence intervals and/or hypothesis tests to compare tooth growth by supp and dose
+
+Now let's use confidence intervals for the analysis of different scenarios.
+
+#### Dose alone
+
+```{r}
+dataset <- data.table(ToothGrowth)
+t1<-subset(dataset,dose==0.5)$len
+t2<-subset(dataset,dose==1)$len
+t<-t.test(t1,t2,paired=FALSE,var.equal=FALSE)
+t$conf.int[1:2]
+```
+
+The confidence interval does not contain 0 when increasing the dose level from 0.5 mg to 1 mg, so the null hypotesis (this is this dose does not increase the teeth length) is rejected.
+
+```{r}
+t1<-subset(dataset,dose==1)$len
+t2<-subset(dataset,dose==2)$len
+t<-t.test(t1,t2,paired=FALSE,var.equal=FALSE)
+t$conf.int[1:2]
+```
+
+Again the null hypotesis is rejected, so the increase of level dose from 1 mg to 2 mg do increase the teeth length.
+
+#### Supplement alone
+
+```{r}
+t1<-subset(dataset,supp=='VC')$len
+t2<-subset(dataset,supp=='OJ')$len
+t<-t.test(t1,t2,paired=FALSE,var.equal=FALSE)
+t$p.value
+t$conf.int[1:2]
+```
+The confidence interval contains zero, and the P-value is 0.061. The null hypotesis (Vitamin C supplement alone does not affect teeth growth) is rejected, as expected.
+
+#### Supplement by dosage
+
+```{r}
+t1<-subset(dataset,supp=='VC' & dose==0.5)$len
+t2<-subset(dataset,supp=='OJ' & dose==0.5)$len
+t<-t.test(t1,t2,paired=FALSE,var.equal=FALSE)
+t$conf.int[1:2]
+```
+
+The confidence interval when comparing both supplements at the dose level of 0.5 mg does not contain zero, so the null hypotesis that supplement type when dose is 0.5 level does not affect tooth growth is rejected.
+
+```{r}
+t1<-subset(dataset,supp=='VC' & dose==1)$len
+t2<-subset(dataset,supp=='OJ' & dose==1)$len
+t<-t.test(t1,t2,paired=FALSE,var.equal=FALSE)
+t$conf.int[1:2]
+```
+
+The confidence interval when comparing both supplements at the dose level of 1 mg does not contain zero, so the null hypotesis that supplement type when dose is 1 level does not affect tooth growth is rejected.
+
+```{r}
+t1<-subset(dataset,supp=='VC' & dose==2)$len
+t2<-subset(dataset,supp=='OJ' & dose==2)$len
+t<-t.test(t1,t2,paired=FALSE,var.equal=FALSE)
+t$p.value
+t$conf.int[1:2]
+```
+
+The confidence interval when comparing both supplements at the dose level of 2 mg does contain zero this time, and the P-value is almost 1.0, so the null hypotesis (supplement type when dose is 2 level does not affect tooth growth) cannot be rejected.
+
+# Step 4: Conclusions and assumptions
+
+#### Conclusions
+
+- The increase of dose level of Vitamine C alone increases tooth growth.
+- Regardless of dose level, supplement type alone does not affect tooth growth.
+- For dose levels of 0.5 mg and 1 mg the supplement type of orange juice (OJ) has a greater impact on tooth growth than ascorbic acid (VC), but 
+- For a dose level of 2 mg, there is no impact on the different type of suplement used (OJ versus VC).
+
+#### Assumptions
+
+- The sample of pigs is representative.
+- The dose level and the supplement type were randomly assigned.
+- The distribution of the means is normal and the confidence intervals are assumed not to be paired.

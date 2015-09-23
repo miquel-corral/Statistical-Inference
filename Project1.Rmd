@@ -1,0 +1,119 @@
+---
+title: "Statistical Inference - Course Project - Part 1"
+author: "Miguel Corral"
+date: "23th September 2015"
+output: 
+  html_document:
+    css: styles.css
+---
+
+# Overview
+
+This report shows the comparison made betweeen the exponential distribution and the Central Limit Theoreme.
+
+This analysis will show:
+
+1. The sample mean and compare it to the theoretical mean of the distribution.
+2. How variable the sample is (via variance) and compare it to the theoretical variance of the distribution.
+3. That the distribution is approximately normal.
+
+### Parameters for the analysis
+
+- The exponential distribution is simulated in R with 'exp(n, lambda)' where lambda is the rate parameter.
+- The mean of the exponential distribution is 1/lambda.
+- The standard deviation is also 1/lambda.
+- Lambda will be set to 0.2 for all the simulations.
+- The analysis will be done upon the averages of 40 exponentials.
+- There will be done 10 thousand simulations.
+
+# Simulations
+
+```{r}
+# set seed for reproducability
+set.seed(43)
+# set lambda to 0.2
+lambda <- 0.2
+# 40 samples
+n <- 40
+# 10000 simulations
+no_simulations <- 10000
+# generate matrix of exponentials
+exponentials <- replicate(no_simulations, rexp(n, lambda))
+# calculate mean of exponentials
+exponentials_means <- apply(exponentials, 2, mean)
+```
+
+# 1. Sample Mean versus Theoretical Mean
+
+```{r fig.width=3,fig.height=3,echo=FALSE}
+# calculation of the distribution mean
+distribution_mean <- mean(exponentials_means)
+distribution_mean
+# theoretical center of the distribution
+theoretical_mean <- 1/lambda
+theoretical_mean
+# graphical representation
+hist(exponentials_means,breaks=n,prob=T,col="blue",main="Density of means",ylab="Density")
+abline(v=distribution_mean,col="black",lwd=4)
+```
+
+As seen above, the sample distribution mean (`r distribution_mean`) is very close to the theoretical mean (`r theoretical_mean`)
+
+# 2. Sample Variance versus Theoretical Variance
+
+Let's first calculate the sample variance:
+```{r}
+# standard deviation of distribution
+distribution_standard_deviation <- sd(exponentials_means)
+distribution_standard_deviation
+# variance of distribution
+sample_variance <- distribution_standard_deviation^2
+sample_variance
+```
+
+Now let's calculate the theoretical variance:
+```{r}
+# standard deviation from exponential distribution
+theoretical_standard_deviation <- (1/lambda)/sqrt(n)
+theoretical_standard_deviation
+# theoretical variance
+variance_theory <- ((1/lambda)*(1/sqrt(n)))^2
+variance_theory
+```
+
+The standard deviation of the distribution is `r sd(exponentials_means)` and the theoretical standard distribution is `r (1/lambda)/sqrt(n)`. The theoretical variance is `r ((1/lambda)*(1/sqrt(n)))^2`and the sample variance of 40 exponentials is `r sd(exponentials_means)^2` that is very close.
+
+Graphical representation
+
+```{r fig.width=6, fig.height=3,echo=FALSE}
+# plot the histogram of averages
+hist(exponentials_means, breaks=50, prob=TRUE,
+     main="Distribution of averages of samples,
+     drawn from exponential distribution with lambda=0.2",
+     xlab="", col="lightgreen")
+# density of the averages of samples
+lines(density(exponentials_means), col="red")
+# theoretical center of distribution
+abline(v=1/lambda, col="blue")
+# theoretical density of the averages of samples
+xfit <- seq(min(exponentials_means), max(exponentials_means), length=100)
+yfit <- dnorm(xfit, mean=1/lambda, sd=(1/lambda/sqrt(n)))
+lines(xfit, yfit, pch=25, col="blue", lty=5)
+# add legend
+legend('topright', c("simulation", "theoretical"), lty=c(1,2), col=c("black", "blue"))
+```
+
+As shown in the graph, the calculated distribution of means of samples of exponential distributions, overlaps quite nice with the normal distribution.
+
+# 3. Distribution
+
+The central limit theorem exposes that the averages of samples follow normal distribution. The figure above shows  the histogram of the density and the normal deensity with theoretical mean and variance values.
+
+```{r fig.width=3, fig.height=3,echo=FALSE}
+# plot of the distribution of averages of 40 exponentials
+qqnorm(exponentials_means, col="blue")
+# plot of the line corresponding normal distribution
+qqline(exponentials_means, col = "black")
+```
+
+The q-q plot suggests the distribution of averages of 40 exponentials is very close to a normal distribution.

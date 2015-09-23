@@ -1,0 +1,27 @@
+body, .body {
+  font-size: 12px;
+}
+
+p, .p {
+  font-size: 12px;
+}
+
+h1, .h1 {
+  font-size: 14px;
+}
+
+h4, .h4 {
+  font-size: 14px;
+}
+
+h3, .h3 {
+  font-size: 14px;
+}
+
+r, .r {
+  font-size: 12px;  
+}
+
+code, .code {
+  font-size: 10px;  
+}
